@@ -1,4 +1,5 @@
 # Makefile for a java project
+# I fucking love makefiles why not.
 
 
 .PHONY: all clean test jar
