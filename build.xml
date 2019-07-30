@@ -1,0 +1,112 @@
+<?xml version="1.0"?>
+
+<!-- Please follow all TODOs-->
+
+<!-- TODO Change the project name (the template is jcrypt)-->
+<project name="JCrypt" default="main" basedir=".">
+<!-- /END -->
+	<!-- use this to preset all javac with the includeruntime set as false
+	this can still be overridden manually if desired-->
+	<presetdef name="javac">
+		<javac includeantruntime="false" />
+	</presetdef>
+	<property name="build.dir" value="build" />
+
+	<!-- TODO Change the project name-->
+	<property name="projectname" value="JCrypt" />
+	<!-- /END -->
+
+	<!-- Sets variables which can later be used. -->
+	<!-- The value of a property is accessed via ${} -->
+	<property name="main.src.dir" value="src" />
+	<property name="test.src.dir" value="test" />
+	<property name="main.build.dir" value="${build.dir}/main" />
+	<property name="test.build.dir" value="${build.dir}/test" />
+	<property name="lib.dir" location="lib" />
+	<property name="dist.dir" location="dist" />
+	<property name="docs.dir" location="docs" />
+	<!-- global usr library -->
+	<property name="usr_share_java.dir" location="/usr/share/java" />
+
+	<!--Create a classpath container which can be later used in the ant task-->
+	<path id="base.classpath">
+		<fileset dir="${lib.dir}">
+		<include name="**/*.jar" />
+		</fileset>
+	</path>
+	<path id="test.classpath">
+		<pathelement location="${usr_share_java.dir}/junit.jar" />
+		<pathelement location="${usr_share_java.dir}/hamcrest-core.jar" />
+		<pathelement location="${main.build.dir}"/>
+		<path refid="base.classpath" />
+	</path>
+
+	<target name="compile">
+	<mkdir dir="${main.build.dir}"/>
+	<javac srcdir="${main.src.dir}" destdir="${main.build.dir}">
+	<classpath refid="base.classpath"/>
+	</javac>
+	</target>
+
+	<target name="tests" depends="compile">
+	<mkdir dir="${test.build.dir}"/>
+	<javac srcdir="${test.src.dir}" destdir="${test.build.dir}" includeantruntime="false">
+	<classpath refid="test.classpath"/>
+	</javac>
+	</target>
+
+	<!-- Test and build all files  -->
+	<!-- To run this: use "ant" (default) or "ant run" -->
+	<target name="junit" depends="tests">
+	<junit printsummary="on" haltonfailure="yes">
+		<classpath>
+		<path refid="test.classpath" />
+		<pathelement location="${test.build.dir}"/>
+		</classpath>
+		<formatter type="brief" usefile="false" />
+		<batchtest>
+		<fileset dir="${test.src.dir}" includes="**/*Test*.java" />
+		</batchtest>
+	</junit>
+	</target>
+
+	<!-- Creates the deployable jar file  -->
+	<target name="jar" depends="compile">
+	<mkdir dir="${dist.dir}"/>
+	<jar destfile="${dist.dir}\${projectname}.jar" basedir="${build.dir}">
+		<manifest> <!-- TODO Please edit the main class based on project-->
+			<!--define Ant01 as the main program for this jar-->
+			<attribute name="Main-Class" value="jcrypt.JCrypt" />
+		</manifest> <!-- /END -->
+
+	</jar>
+	</target>
+
+
+	<!-- delete all class files -->
+	<!-- To run this: use "ant clean" -->
+	<target name="clean">
+	<delete>
+	<fileset dir="${basedir}" includes="**/*.class" />
+	</delete>
+	<delete dir="${build.dir}" />
+	<delete dir="${docs.dir}" />
+	<delete dir="${dist.dir}" />
+	</target>
+
+
+	<!-- Creates Javadoc
+	<target name="docs" depends="compile">
+	<javadoc packagenames="src" sourcepath="${src.dir}" destdir="${docs.dir}">
+		<fileset dir="${src.dir}">
+			<include name="**" />
+		</fileset>
+	</javadoc>
+	</target>-->
+
+	<target name="main" depends="compile, junit, jar">
+	<description>Main target</description>
+	<echo>Project : ${projectname}</echo>
+	</target>
+
+</project>
