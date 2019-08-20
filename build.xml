@@ -73,7 +73,7 @@
 	<!-- Creates the deployable jar file  -->
 	<target name="jar" depends="compile">
 	<mkdir dir="${dist.dir}"/>
-	<jar destfile="${dist.dir}\${projectname}.jar" basedir="${build.dir}">
+	<jar destfile="${dist.dir}\output.jar" basedir="${main.build.dir}">
 		<manifest> <!-- TODO Please edit the main class based on project-->
 			<!--define Ant01 as the main program for this jar-->
 			<attribute name="Main-Class" value="jcrypt.JCrypt" />

@@ -11,14 +11,13 @@ all:
 clean:
 	ant clean
 
-# TODO please fix this
 test:
 	ant junit
 
 jar:
 	ant jar
 
+# TODO please change the jar file name
 run:
-	#TODO please change to the jar file name
-	java -jar dist/*.jar
+	java -jar dist/output.jar
 
