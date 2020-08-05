@@ -1,0 +1,3 @@
+package naming conventions
+reverse domain name of the company/organization
+i.e, org.apache (apache.org), edu.mmu (mmu.edu)

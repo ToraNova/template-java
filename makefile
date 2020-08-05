@@ -11,7 +11,6 @@ all:
 clean:
 	ant clean
 
-# TODO please fix this
 test:
 	ant junit
 

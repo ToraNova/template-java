@@ -2,8 +2,8 @@
 
 <!-- Please follow all TODOs-->
 
-<!-- TODO Change the project name (the template is jcrypt)-->
-<project name="JCrypt" default="main" basedir=".">
+<!-- TODO Change the project name -->
+<project name="jidcrypt" default="build" basedir=".">
 <!-- /END -->
 	<!-- use this to preset all javac with the includeruntime set as false
 	this can still be overridden manually if desired-->
@@ -13,7 +13,7 @@
 	<property name="build.dir" value="build" />
 
 	<!-- TODO Change the project name-->
-	<property name="projectname" value="JCrypt" />
+	<property name="projectname" value="jidcrypt" />
 	<!-- /END -->
 
 	<!-- Sets variables which can later be used. -->
@@ -38,34 +38,34 @@
 		<pathelement location="${usr_share_java.dir}/junit.jar" />
 		<pathelement location="${usr_share_java.dir}/hamcrest-core.jar" />
 		<pathelement location="${main.build.dir}"/>
+		<pathelement location="${test.build.dir}"/>
+		<pathelement location="${lib.dir}"/>
 		<path refid="base.classpath" />
 	</path>
 
 	<target name="compile">
-	<mkdir dir="${main.build.dir}"/>
-	<javac srcdir="${main.src.dir}" destdir="${main.build.dir}">
-	<classpath refid="base.classpath"/>
-	</javac>
+		<mkdir dir="${main.build.dir}"/>
+		<javac srcdir="${main.src.dir}" destdir="${main.build.dir}">
+			<classpath refid="base.classpath"/>
+		</javac>
 	</target>
 
-	<target name="tests" depends="compile">
-	<mkdir dir="${test.build.dir}"/>
-	<javac srcdir="${test.src.dir}" destdir="${test.build.dir}" includeantruntime="false">
-	<classpath refid="test.classpath"/>
-	</javac>
+	<target name="compile-test" depends="compile">
+		<mkdir dir="${test.build.dir}"/>
+		<javac srcdir="${test.src.dir}" destdir="${test.build.dir}" includeantruntime="false">
+			<classpath refid="test.classpath"/>
+		</javac>
 	</target>
 
-	<!-- Test and build all files  -->
-	<!-- To run this: use "ant" (default) or "ant run" -->
-	<target name="junit" depends="tests">
+	<target name="junit" depends="compile-test">
 	<junit printsummary="on" haltonfailure="yes">
 		<classpath>
-		<path refid="test.classpath" />
-		<pathelement location="${test.build.dir}"/>
+			<path refid="test.classpath" />
+			<pathelement location="${test.build.dir}"/>
 		</classpath>
 		<formatter type="brief" usefile="false" />
 		<batchtest>
-		<fileset dir="${test.src.dir}" includes="**/*Test*.java" />
+			<fileset dir="${test.src.dir}" includes="**/*Test*.java" />
 		</batchtest>
 	</junit>
 	</target>
@@ -86,14 +86,20 @@
 	<!-- delete all class files -->
 	<!-- To run this: use "ant clean" -->
 	<target name="clean">
-	<delete>
-	<fileset dir="${basedir}" includes="**/*.class" />
-	</delete>
-	<delete dir="${build.dir}" />
-	<delete dir="${docs.dir}" />
-	<delete dir="${dist.dir}" />
+		<delete>
+			<fileset dir="${basedir}" includes="**/*.class" />
+		</delete>
+		<delete dir="${build.dir}" />
+		<delete dir="${docs.dir}" />
+		<delete dir="${dist.dir}" />
 	</target>
 
+	<!-- Test and build all files  -->
+	<!-- To run this: use "ant" (default) or "ant run" -->
+	<target name="build" depends="jar, junit">
+		<description>Main target</description>
+		<echo>Project : ${projectname}</echo>
+	</target>
 
 	<!-- Creates Javadoc
 	<target name="docs" depends="compile">
@@ -103,10 +109,5 @@
 		</fileset>
 	</javadoc>
 	</target>-->
-
-	<target name="main" depends="compile, junit, jar">
-	<description>Main target</description>
-	<echo>Project : ${projectname}</echo>
-	</target>
 
 </project>
