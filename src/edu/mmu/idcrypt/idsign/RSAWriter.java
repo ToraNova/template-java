@@ -13,13 +13,14 @@ package edu.mmu.idcrypt.idsign;
 
 import org.apache.log4j.Logger;
 import java.math.BigInteger;
-import java.io.IOException;
 import java.io.BufferedWriter;
 import java.io.BufferedReader;
 
 import java.security.SecureRandom;
+
 import java.security.NoSuchAlgorithmException;
 import java.text.ParseException;
+import java.io.IOException;
 
 public class RSAWriter extends IBSWriter {
 
@@ -42,6 +43,12 @@ public class RSAWriter extends IBSWriter {
 
 		parseMPK(mpkReader);
 		parseSIG(sigReader);
+
+		try{
+			if(invalidID(userid))return false;
+		}catch(Exception e){
+			return false;
+		}
 
 		// h = H(ID) mod n
 		mMD.reset();
@@ -67,7 +74,11 @@ public class RSAWriter extends IBSWriter {
 		SecureRandom rand = new SecureRandom();
 
 		parseUSK(uskReader);
-                t = new BigInteger(rand.nextInt(n.bitLength()),rand).mod(n);
+
+		do{
+			t = new BigInteger(rand.nextInt(n.bitLength()),rand).mod(n);
+		}while(t.compareTo(BigInteger.TEN)==-1);
+
 		T = t.modPow(e,n);
 		String MT = msg.concat(T.toString());
 
@@ -101,40 +112,45 @@ public class RSAWriter extends IBSWriter {
 	public boolean uskGen(
 			BufferedReader mskReader,
 			BufferedWriter uskWriter,
-			String userid,
-			int exprday
+			String userid
 	) throws IOException, ParseException{
 		//read secret
 		parseMSK(mskReader);
 
 		mMD.reset(); //reset the message digest
-		mMD.update( appendExpiry(userid, exprday).getBytes() );
+		mMD.update( userid.getBytes() );
 		h = new BigInteger(mMD.digest()).mod(n);
 		x = h.modPow(d, n);
 
 		//clear secret from memory
 		d = BigInteger.ZERO;
-		e = BigInteger.ZERO;
-		n = BigInteger.ZERO;
 
 		//output
 		uskWriter.write(mType+newline);
-		uskWriter.write(x.toString());
+		uskWriter.write(x.toString()+newline);
+		uskWriter.write(e.toString()+newline);
+		uskWriter.write(n.toString()+newline);
+
 		//clear usk
 		x = BigInteger.ZERO;
+		e = BigInteger.ZERO;
+		n = BigInteger.ZERO;
+
 		return false;
 	}
 
 	@Override
 	protected void parseUSK(BufferedReader br) throws IOException{
 		x = new BigInteger(br.readLine());
+		e = new BigInteger(br.readLine());
+		n = new BigInteger(br.readLine());
 	}
 
 	/*
 	 * compute a rsa keypair
 	 */
 	@Override
-	public boolean keyGen(
+	public boolean mskSetup(
 			BufferedWriter mskWriter,
 			BufferedWriter mpkWriter,
 			String skparam

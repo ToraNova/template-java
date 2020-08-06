@@ -56,6 +56,8 @@ public abstract class IBSWriter {
 
 	/*
 	 * verify a signature and userid
+	 * return TRUE if valid
+	 * FALSE if msg is invalid
 	 */
 	protected abstract boolean verifyMsg(
 			BufferedReader mpkReader,
@@ -74,46 +76,51 @@ public abstract class IBSWriter {
 	) throws IOException;
 
 	/*
+	 * signs on userid with msk, place result in usk
+	 */
+	protected abstract boolean uskGen(
+			BufferedReader mskReader,
+			BufferedWriter uskWriter,
+			String userid
+	) throws IOException, ParseException;
+
+	/*
 	 * perform keygeneration
 	 */
-	protected abstract boolean keyGen(
+	protected abstract boolean mskSetup(
 			BufferedWriter mskWriter,
 			BufferedWriter mpkWriter,
 			String skparam
 	) throws NoSuchAlgorithmException, IOException;
 
 	/*
-	 * signs on userid with msk, place result in usk
-	 */
-	protected abstract boolean uskGen(
-			BufferedReader mskReader,
-			BufferedWriter uskWriter,
-			String userid,
-			int exprday
-	) throws IOException, ParseException;
-
-	/*
-	 * Overloaded uskgen function
-	 */
-	protected boolean uskGen(
-			BufferedReader mskReader,
-			BufferedWriter uskWriter,
-			String userid
-	) throws IOException, ParseException{
-		return uskGen(mskReader, uskWriter, userid, 360);
-	}
-
-	/*
 	 * Builds a signature candidate by appending expiry of usk to public string
 	 * userid + expiry date
 	 */
 	public String appendExpiry(String userid, int exprday) throws ParseException{
-		String dt = new SimpleDateFormat(mDFormat).format(new Date());
+		String dt = mSDF.format(new Date());
 		Calendar c = Calendar.getInstance();
 		c.setTime(mSDF.parse(dt));
 		c.add(Calendar.DATE,exprday);
 		dt = mSDF.format(c.getTime());
 		return userid+dt;
+	}
+
+	/*
+	 * checks if a public + expiry date has expired.
+	 * if today > yyyyMMdd, then return true,
+	 * else false
+	 */
+	public boolean invalidID(String appendedID) throws ParseException{
+		if(appendedID.length() - 8 <= 0) return true;
+		String datestr = appendedID.substring( appendedID.length() - 8 );
+		Date expiry = mSDF.parse("20120405");
+
+		if(expiry.before(new Date())){
+			//expired
+			return false;
+		}
+		return true;
 	}
 
 

@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
 import org.junit.Test;
 
@@ -30,6 +31,8 @@ public final class SampleTest {
 
 	@Test
 	public void test(){
+		BasicConfigurator.configure();
+
 		Sample s = new Sample();
 		int res = s.add(1,2);
 		assertEquals(res, 3);

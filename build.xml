@@ -10,7 +10,6 @@
 	<presetdef name="javac">
 		<javac includeantruntime="false" />
 	</presetdef>
-	<property name="build.dir" value="build" />
 
 	<!-- TODO Change the project name-->
 	<property name="projectname" value="jidcrypt" />
@@ -18,14 +17,17 @@
 
 	<!-- Sets variables which can later be used. -->
 	<!-- The value of a property is accessed via ${} -->
-	<property name="main.src.dir" value="src" />
-	<property name="test.src.dir" value="test" />
+	<property name="build.dir" value="${basedir}/build" />
+	<property name="main.src.dir" value="${basedir}/src" />
+	<property name="test.src.dir" value="${basedir}/test" />
+	<property name="lib.dir" location="${basedir}/lib" />
+	<property name="dist.dir" location="${basedir}/dist" />
+	<property name="docs.dir" location="${basedir}/docs" />
 	<property name="main.build.dir" value="${build.dir}/main" />
 	<property name="test.build.dir" value="${build.dir}/test" />
-	<property name="lib.dir" location="lib" />
-	<property name="dist.dir" location="dist" />
-	<property name="docs.dir" location="docs" />
+
 	<!-- global usr library -->
+	<!-- TODO please configure this accordingly!-->
 	<property name="usr_share_java.dir" location="/usr/share/java" />
 
 	<!--Create a classpath container which can be later used in the ant task-->
@@ -35,6 +37,7 @@
 		</fileset>
 	</path>
 	<path id="test.classpath">
+		<!--TODO: please ensure junit.jar and hamcrest-core.jar is installed in use_share_java.dir-->
 		<pathelement location="${usr_share_java.dir}/junit.jar" />
 		<pathelement location="${usr_share_java.dir}/hamcrest-core.jar" />
 		<pathelement location="${main.build.dir}"/>
@@ -58,7 +61,9 @@
 	</target>
 
 	<target name="junit" depends="compile-test">
-	<junit printsummary="on" haltonfailure="yes">
+	<junit printsummary="on" haltonfailure="yes" fork="yes">
+		<jvmarg value="-Xmx1G"/>
+		<env key="BASEDIR" value="${basedir}"/>
 		<classpath>
 			<path refid="test.classpath" />
 			<pathelement location="${test.build.dir}"/>
@@ -73,12 +78,11 @@
 	<!-- Creates the deployable jar file  -->
 	<target name="jar" depends="compile">
 	<mkdir dir="${dist.dir}"/>
-	<jar destfile="${dist.dir}\${projectname}.jar" basedir="${build.dir}">
+	<jar destfile="${dist.dir}\${projectname}-cli.jar" basedir="${main.build.dir}">
 		<manifest> <!-- TODO Please edit the main class based on project-->
 			<!--define Ant01 as the main program for this jar-->
-			<attribute name="Main-Class" value="jcrypt.JCrypt" />
+			<attribute name="Main-Class" value="edu.mmu.idcrypt.idsign.PrimaryCLI" />
 		</manifest> <!-- /END -->
-
 	</jar>
 	</target>
 
