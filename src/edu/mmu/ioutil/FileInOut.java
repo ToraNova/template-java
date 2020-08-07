@@ -22,23 +22,40 @@ public class FileInOut {
 
 	private static final Logger log = Logger.getLogger(FileInOut.class);
 	private File mFile;
+	private boolean mNew;
 
 	public FileInOut(String filename, boolean renew) throws IOException{
 		mFile = new File(filename);
 
+		File pFile = mFile.getParentFile();
+
 		//ensure parent directory exists
-		if(! mFile.getParentFile().exists()){
+		if(pFile != null && !pFile.exists()){
 			mFile.getParentFile().mkdirs();
 		}
 
 		if(!mFile.exists()){
 			//create file if not exist
 			mFile.createNewFile();
+			mNew = true;
 		}else if(renew){
 			//renew file
 			mFile.delete();
 			mFile.createNewFile();
-		}
+			mNew = true;
+		}else mNew = false;
+	}
+
+	public void create() throws IOException{
+		mFile.createNewFile();
+	}
+
+	public void delete(){
+		mFile.delete();
+	}
+
+	public boolean isNew(){
+		return mNew;
 	}
 
 	public FileInOut(String filename)throws IOException{

@@ -81,16 +81,28 @@ public final class IBSTest {
 			BufferedWriter sigbw = sigfile.getBufWrite();
 
 			assertEquals( uskbr.readLine(), "RSA" );
-			assertFalse( idsrsa.signMsg( uskbr, sigbw, "hello world") );
+			assertFalse( idsrsa.signMsg( uskbr, "hello world", sigbw) );
 
 			uskbr.close();
 			sigbw.close();
 
-			BufferedReader mpkbr = pkfile.getBufRead();
-			BufferedReader sigbr = sigfile.getBufRead();
+			BufferedReader mpkbr;
+			BufferedReader sigbr;
 
+			mpkbr = pkfile.getBufRead();
+			sigbr = sigfile.getBufRead();
 			assertEquals( sigbr.readLine(), mpkbr.readLine() );
-			assertTrue( idsrsa.verifyMsg( mpkbr, sigbr, offid, "hello world") );
+			assertFalse( idsrsa.verifyMsg( mpkbr, "hello world1", sigbr, offid) );
+
+			mpkbr = pkfile.getBufRead();
+			sigbr = sigfile.getBufRead();
+			assertEquals( sigbr.readLine(), mpkbr.readLine() );
+			assertFalse( idsrsa.verifyMsg( mpkbr, "hello world", sigbr,"b"+offid) );
+
+			mpkbr = pkfile.getBufRead();
+			sigbr = sigfile.getBufRead();
+			assertEquals( sigbr.readLine(), mpkbr.readLine() );
+			assertTrue( idsrsa.verifyMsg( mpkbr, "hello world", sigbr, offid) );
 
 			mpkbr.close();
 			sigbr.close();

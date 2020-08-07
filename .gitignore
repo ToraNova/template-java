@@ -5,3 +5,7 @@
 /dist/*
 /tmp/*
 !/tmp/.gitkeep
+
+#TODO remove this if the deployment environment doesn't support make
+winrun.bat
+nixrun.sh

@@ -17,6 +17,8 @@ import org.apache.log4j.Logger;
 import java.io.IOException;
 import java.io.BufferedWriter;
 import java.io.BufferedReader;
+import java.io.StringReader;
+import java.io.Reader;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -28,6 +30,38 @@ import java.text.ParseException;
 
 public abstract class IBSWriter {
 
+	/*
+	 * Static method to obtain the right IBSWriter class
+	 */
+	public static IBSWriter getIBSWriter(String algostr)
+	throws NoSuchAlgorithmException {
+		IBSWriter out;
+		switch(algostr){
+			case "RSA": case "rsa":
+				out = new RSAWriter();
+				break;
+			default:
+				out = null;
+				log.error("unsupported algorithm: "+algostr);
+				log.error("supported algorithms:");
+				for(String s : getSuppAlgo()){
+					log.error(s);
+				}
+				throw new NoSuchAlgorithmException("unsupported algorithm: "+algostr);
+		}
+		return out;
+	}
+
+	public static IBSWriter getIBSWriter(BufferedReader kr)
+	throws NoSuchAlgorithmException, IOException{
+		return getIBSWriter(kr.readLine());
+	}
+
+	public static String[] getSuppAlgo(){
+		String[] out = {"RSA (rsa)"};
+		return out;
+	}
+
 	private static final Logger log = Logger.getLogger(IBSWriter.class);
 
 	protected final String mDFormat = "yyyyMMdd";
@@ -36,9 +70,9 @@ public abstract class IBSWriter {
    	protected String newline = System.getProperty("line.separator");
 
 	protected abstract void parseMSK(BufferedReader br) throws IOException;
-	protected abstract void parseUSK(BufferedReader br) throws IOException;
 	protected abstract void parseMPK(BufferedReader br) throws IOException;
 	protected abstract void parseSIG(BufferedReader br) throws IOException;
+	protected abstract String parseUSK(BufferedReader br) throws IOException;
 	protected boolean mInit = false;
 
 	/*
@@ -55,25 +89,54 @@ public abstract class IBSWriter {
 	}
 
 	/*
+	 * provides the default key specs
+	 */
+	protected abstract String getDKeySpec();
+
+	/*
 	 * verify a signature and userid
 	 * return TRUE if valid
 	 * FALSE if msg is invalid
 	 */
 	protected abstract boolean verifyMsg(
 			BufferedReader mpkReader,
+			BufferedReader msgReader,
 			BufferedReader sigReader,
-			String userid,
-			String msg
+			String userid
 	) throws IOException;
+
+	//overloaded base function
+	public boolean verifyMsg(
+			BufferedReader mpkReader,
+			String message,
+			BufferedReader sigReader,
+			String userid
+	) throws IOException{
+		Reader str = new StringReader(message);
+		BufferedReader br = new BufferedReader(str);
+		return verifyMsg(mpkReader,br,sigReader,userid);
+	}
 
 	/*
 	 * perform ID-based signature using usk
 	 */
 	protected abstract boolean signMsg(
 			BufferedReader uskReader,
-			BufferedWriter sigWriter,
-			String message
+			BufferedReader msgReader,
+			BufferedWriter sigWriter
 	) throws IOException;
+
+
+	//overloaded base function
+	public boolean signMsg(
+			BufferedReader uskReader,
+			String message,
+			BufferedWriter sigWriter
+	) throws IOException{
+		Reader str = new StringReader(message);
+		BufferedReader br = new BufferedReader(str);
+		return signMsg(uskReader, br, sigWriter);
+	}
 
 	/*
 	 * signs on userid with msk, place result in usk
@@ -114,15 +177,13 @@ public abstract class IBSWriter {
 	public boolean invalidID(String appendedID) throws ParseException{
 		if(appendedID.length() - 8 <= 0) return true;
 		String datestr = appendedID.substring( appendedID.length() - 8 );
-		Date expiry = mSDF.parse("20120405");
-
+		Date expiry = mSDF.parse(datestr);
 		if(expiry.before(new Date())){
 			//expired
-			return false;
+			return true;
 		}
-		return true;
+		return false;
 	}
-
 
 	public Logger getLogger(){
 		return log;

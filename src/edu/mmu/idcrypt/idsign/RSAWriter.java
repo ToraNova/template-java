@@ -35,9 +35,9 @@ public class RSAWriter extends IBSWriter {
 	@Override
 	public boolean verifyMsg(
 		BufferedReader mpkReader,
+		BufferedReader msgReader,
 		BufferedReader sigReader,
-		String userid,
-		String msg
+		String userid
 	) throws IOException {
 		BigInteger c;
 
@@ -54,20 +54,25 @@ public class RSAWriter extends IBSWriter {
 		mMD.reset();
 		mMD.update(userid.getBytes());
 		h = new BigInteger(mMD.digest()).mod(n);
-		String MT = msg.concat(T.toString());
 
 		// c = H( msg || T ) mod n
 		mMD.reset();
-		mMD.update(MT.getBytes());
+		while(true){
+			String line = msgReader.readLine();
+			if(line==null)break;
+			mMD.update(line.getBytes());
+		}
+		mMD.update(T.toString().getBytes());
 		c = new BigInteger(mMD.digest());
+
 		return (h.multiply(T.modPow(c,n)).mod(n).compareTo(s.modPow(e,n)) == 0);
 	}
 
 	@Override
 	public boolean signMsg(
 			BufferedReader uskReader,
-			BufferedWriter sigWriter,
-			String msg
+			BufferedReader msgReader,
+			BufferedWriter sigWriter
 	) throws IOException {
 		BigInteger t,c;
 
@@ -80,11 +85,16 @@ public class RSAWriter extends IBSWriter {
 		}while(t.compareTo(BigInteger.TEN)==-1);
 
 		T = t.modPow(e,n);
-		String MT = msg.concat(T.toString());
 
 		mMD.reset();
-		mMD.update(MT.getBytes());
+		while(true){
+			String line = msgReader.readLine();
+			if(line==null)break;
+			mMD.update(line.getBytes());
+		}
+		mMD.update(T.toString().getBytes());
 		c = new BigInteger(mMD.digest());
+
 		s = x.multiply(t.modPow(c, n)).mod(n);
 
 		//clear USK
@@ -127,6 +137,7 @@ public class RSAWriter extends IBSWriter {
 
 		//output
 		uskWriter.write(mType+newline);
+		uskWriter.write(userid+newline);
 		uskWriter.write(x.toString()+newline);
 		uskWriter.write(e.toString()+newline);
 		uskWriter.write(n.toString()+newline);
@@ -140,10 +151,17 @@ public class RSAWriter extends IBSWriter {
 	}
 
 	@Override
-	protected void parseUSK(BufferedReader br) throws IOException{
+	protected String parseUSK(BufferedReader br) throws IOException{
+		String out = br.readLine(); //read userid
 		x = new BigInteger(br.readLine());
 		e = new BigInteger(br.readLine());
 		n = new BigInteger(br.readLine());
+		return out;
+	}
+
+	@Override
+	public String getDKeySpec(){
+		return "2048";
 	}
 
 	/*
@@ -160,7 +178,7 @@ public class RSAWriter extends IBSWriter {
 		try{
 			bits = Integer.parseInt(skparam);
 		}catch(Exception e){
-			log.error("Error parsing skparam for RSA: "+skparam);
+			log.error("error parsing skparam for RSA: "+skparam);
 			bits = 2048; //default key size
 		}
 
@@ -190,7 +208,7 @@ phi = BigInteger.ZERO;
 break;
 // KEYGEN END
 		 	default:
-	    			throw new NoSuchAlgorithmException("RSA keyGen only supports 1024,2048, 3072 and 4096 bits.");
+	    			throw new NoSuchAlgorithmException("RSA keyGen only supports 1024, 2048, 3072 and 4096 bits.");
 		}
 
 		//write to msk
