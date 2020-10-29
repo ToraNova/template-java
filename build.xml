@@ -57,7 +57,8 @@
 
 	<target name="compile-test" depends="compile">
 		<mkdir dir="${test.build.dir}"/>
-		<javac srcdir="${test.src.dir}" destdir="${test.build.dir}" includeantruntime="false">
+		<javac srcdir="${test.src.dir}" destdir="${test.build.dir}"
+		includeantruntime="false" debug="true">
 			<classpath refid="test.classpath"/>
 		</javac>
 	</target>

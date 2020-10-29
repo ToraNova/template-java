@@ -17,8 +17,8 @@ all: build nixrun.sh winrun.bat
 
 #TODO ensure script files have the right name
 clean:
-	rm nixrun.sh
-	rm winrun.bat
+	rm -f nixrun.sh
+	rm -f winrun.bat
 	ant clean
 
 build:

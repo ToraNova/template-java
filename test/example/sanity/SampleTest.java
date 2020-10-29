@@ -30,12 +30,20 @@ public final class SampleTest {
 	private static final Logger log = Logger.getLogger(SampleTest.class);
 
 	@Test
-	public void test(){
+	public void main(){
 		BasicConfigurator.configure();
-
 		Sample s = new Sample();
-		int res = s.add(1,2);
-		assertEquals(res, 3);
+		int res = s.add(3,2);
+		assertEquals(res, 5);
+		log.info("main sanity test passed");
+	}
+
+	@Test
+	public void aux(){
+		BasicConfigurator.configure();
+		assertTrue(true);
+		assertFalse(false);
+		log.info("aux sanity test passed");
 	}
 
 }
