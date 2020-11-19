@@ -5,6 +5,7 @@
 /dist/*
 /tmp/*
 !/tmp/.gitkeep
+build.number
 
 #TODO remove this if the deployment environment doesn't support make
 winrun.bat

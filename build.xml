@@ -47,6 +47,7 @@
 	</path>
 
 	<target name="compile">
+		<buildnumber/>
 		<mkdir dir="${main.build.dir}"/>
 		<javac srcdir="${main.src.dir}" destdir="${main.build.dir}">
 			<classpath refid="base.classpath"/>
@@ -81,7 +82,7 @@
 	<!-- Creates the deployable jar file  -->
 	<target name="jar" depends="compile">
 	<mkdir dir="${dist.dir}"/>
-	<jar destfile="${dist.dir}\${projectname}-cli.jar" basedir="${main.build.dir}">
+	<jar destfile="${dist.dir}\${projectname}-cli.${build.number}.jar" basedir="${main.build.dir}">
 		<manifest> <!-- TODO Please edit the main class based on project-->
 			<!--define Ant01 as the main program for this jar-->
 			<attribute name="Main-Class" value="edu.mmu.idcrypt.idsign.PrimaryCLI" />
